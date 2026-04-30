@@ -15,6 +15,7 @@ import (
 	"github.com/torenander/teams-local-mcp/internal/logging"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/microsoftgraph/msgraph-sdk-go/users"
 )
 
 // NewHandleListChats creates a tool handler that lists the authenticated
@@ -57,10 +58,17 @@ func NewHandleListChats(retryCfg graph.RetryConfig, timeout time.Duration) func(
 			"endpoint", "GET /me/chats",
 			"top", maxResults)
 
+		qp := &users.ItemChatsRequestBuilderGetQueryParameters{
+			Top: &maxResults,
+		}
+		reqCfg := &users.ItemChatsRequestBuilderGetRequestConfiguration{
+			QueryParameters: qp,
+		}
+
 		var resp models.ChatCollectionResponseable
 		err = graph.RetryGraphCall(ctx, retryCfg, func() error {
 			var graphErr error
-			resp, graphErr = client.Me().Chats().Get(timeoutCtx, nil)
+			resp, graphErr = client.Me().Chats().Get(timeoutCtx, reqCfg)
 			return graphErr
 		})
 		if err != nil {

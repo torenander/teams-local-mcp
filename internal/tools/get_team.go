@@ -59,8 +59,14 @@ func NewHandleGetTeam(retryCfg graph.RetryConfig, timeout time.Duration) func(ct
 		})
 		if err != nil {
 			if graph.IsTimeoutError(err) {
+				logger.ErrorContext(ctx, "request timed out",
+					"timeout_seconds", int(timeout.Seconds()),
+					"error", err.Error())
 				return mcp.NewToolResultError(graph.TimeoutErrorMessage(int(timeout.Seconds()))), nil
 			}
+			logger.ErrorContext(ctx, "graph API call failed",
+				"error", graph.FormatGraphError(err),
+				"duration", time.Since(start))
 			return mcp.NewToolResultError(graph.RedactGraphError(err)), nil
 		}
 
@@ -78,7 +84,11 @@ func NewHandleGetTeam(retryCfg graph.RetryConfig, timeout time.Duration) func(ct
 			return mcp.NewToolResultText(text), nil
 		}
 
-		jsonBytes, _ := json.Marshal(result)
+		jsonBytes, err := json.Marshal(result)
+		if err != nil {
+			logger.ErrorContext(ctx, "json serialization failed", "error", err)
+			return mcp.NewToolResultError(fmt.Sprintf("failed to serialize result: %s", err.Error())), nil
+		}
 		logger.Info("tool completed", "duration", time.Since(start))
 		return mcp.NewToolResultText(string(jsonBytes)), nil
 	}

@@ -42,7 +42,6 @@ func buildTeamsVerbs(c teamsVerbsConfig) ([]tools.Verb, *tools.VerbRegistry) {
 	}
 
 	rc := c.retryCfg
-	_ = wrapWrite // will be used when send_message is implemented
 
 	verbs := []tools.Verb{
 		help.NewHelpVerb(registryPtr),
@@ -74,7 +73,7 @@ func buildListTeamsVerb(c teamsVerbsConfig, rc graph.RetryConfig, wrap func(stri
 		},
 		Schema: []mcp.ToolOption{
 			mcp.WithString("account",
-				mcp.Description("Account label or UPN to use. Omit to auto-select the default account."),
+				mcp.Description(tools.AccountParamDescription),
 			),
 			mcp.WithString("output",
 				mcp.Description("Output mode: 'text' (default), 'summary', or 'raw'."),
@@ -102,7 +101,7 @@ func buildGetTeamVerb(c teamsVerbsConfig, rc graph.RetryConfig, wrap func(string
 				mcp.Description("The unique identifier of the team."),
 			),
 			mcp.WithString("account",
-				mcp.Description("Account label or UPN to use."),
+				mcp.Description(tools.AccountParamDescription),
 			),
 			mcp.WithString("output",
 				mcp.Description("Output mode: 'text' (default), 'summary', or 'raw'."),
@@ -130,7 +129,7 @@ func buildListChannelsVerb(c teamsVerbsConfig, rc graph.RetryConfig, wrap func(s
 				mcp.Description("The unique identifier of the team."),
 			),
 			mcp.WithString("account",
-				mcp.Description("Account label or UPN to use."),
+				mcp.Description(tools.AccountParamDescription),
 			),
 			mcp.WithString("output",
 				mcp.Description("Output mode: 'text' (default), 'summary', or 'raw'."),
@@ -165,7 +164,7 @@ func buildListChannelMessagesVerb(c teamsVerbsConfig, rc graph.RetryConfig, wrap
 				mcp.Min(1),
 			),
 			mcp.WithString("account",
-				mcp.Description("Account label or UPN to use."),
+				mcp.Description(tools.AccountParamDescription),
 			),
 			mcp.WithString("output",
 				mcp.Description("Output mode: 'text' (default), 'summary', or 'raw'."),
@@ -203,7 +202,7 @@ func buildSendChannelMessageVerb(c teamsVerbsConfig, rc graph.RetryConfig, wrapW
 				mcp.Enum("text", "html"),
 			),
 			mcp.WithString("account",
-				mcp.Description("Account label or UPN to use."),
+				mcp.Description(tools.AccountParamDescription),
 			),
 		},
 	}

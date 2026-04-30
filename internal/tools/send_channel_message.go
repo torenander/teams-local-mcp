@@ -54,7 +54,14 @@ func NewHandleSendChannelMessage(retryCfg graph.RetryConfig, timeout time.Durati
 			return mcp.NewToolResultError("missing required parameter: body"), nil
 		}
 
+		if err := validate.ValidateStringLength(body, "body", validate.MaxBodyLen); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
+		}
+
 		contentType := request.GetString("content_type", "text")
+		if err := validate.ValidateContentType(contentType); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
+		}
 
 		msg := models.NewChatMessage()
 		msgBody := models.NewItemBody()

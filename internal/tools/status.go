@@ -222,13 +222,13 @@ type statusConfigFeatures struct {
 	// ReadOnly indicates whether write operations are disabled.
 	ReadOnly bool `json:"read_only"`
 
-	// TeamsEnabled indicates whether read-only email access is active.
-	TeamsEnabled bool `json:"mail_enabled"`
+	// TeamsEnabled indicates whether read-only teams access is active.
+	TeamsEnabled bool `json:"teams_enabled"`
 
-	// TeamsManageEnabled indicates whether draft management (Mail.ReadWrite) is
-	// active; draft/reply/forward/update/delete tools are registered only when
+	// TeamsManageEnabled indicates whether teams write operations are
+	// active; send/reply/update/delete tools are registered only when
 	// this flag is set (see CR-0058).
-	TeamsManageEnabled bool `json:"mail_manage_enabled"`
+	TeamsManageEnabled bool `json:"teams_manage_enabled"`
 
 	// ProvenanceTag is the extended property name for MCP-created events.
 	ProvenanceTag string `json:"provenance_tag"`
