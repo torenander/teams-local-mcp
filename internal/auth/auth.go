@@ -16,50 +16,41 @@ import (
 	mcpserver "github.com/mark3labs/mcp-go/server"
 )
 
-// calendarScope is the OAuth scope requested for Microsoft Graph calendar
-// operations. The azidentity library automatically includes offline_access
-// to obtain a refresh token.
-const calendarScope = "Calendars.ReadWrite"
+// userScope is always requested for identity resolution.
+const userScope = "User.Read"
 
-// mailScope is the OAuth scope requested for read-only Microsoft Graph mail
-// operations. It is only included when TeamsEnabled is true in the config and
-// TeamsManageEnabled is false.
-const mailScope = "Mail.Read"
+// chatReadScope allows reading chats and messages.
+const chatReadScope = "Chat.Read"
 
-// mailReadWriteScope is the OAuth scope requested for draft-centric mail
-// management. It is a superset of Mail.Read and permits creating, updating,
-// and deleting messages (including drafts). It is requested in place of
-// mailScope when TeamsManageEnabled is true. Mail.Send is intentionally never
-// requested: sending remains a user-only action performed in Outlook.
-const mailReadWriteScope = "Mail.ReadWrite"
+// chatReadWriteScope allows reading and sending chat messages. Subsumes
+// Chat.Read.
+const chatReadWriteScope = "Chat.ReadWrite"
+
+// teamReadScope allows listing joined teams.
+const teamReadScope = "Team.ReadBasic.All"
+
+// channelMessageReadScope allows reading channel messages.
+const channelMessageReadScope = "ChannelMessage.Read.All"
 
 // Scopes returns the OAuth scope slice based on the application configuration.
-// The calendar scope is always included. Mail scopes are selected according to
-// configuration:
 //
-//   - When cfg.TeamsManageEnabled is true, mailReadWriteScope ("Mail.ReadWrite")
-//     is appended. This scope subsumes Mail.Read, so mailScope is not also
-//     added.
-//   - Otherwise, when cfg.TeamsEnabled is true, mailScope ("Mail.Read") is
-//     appended.
-//   - When both flags are false, no mail scope is requested.
-//
-// Scopes never includes "Mail.Send"; sending mail is deliberately outside the
-// server's capability surface.
+//   - User.Read and Team.ReadBasic.All are always included.
+//   - When cfg.TeamsEnabled is true, Chat.Read and ChannelMessage.Read.All
+//     are added for reading chats and channel messages.
+//   - When cfg.TeamsManageEnabled is true, Chat.ReadWrite replaces Chat.Read
+//     to allow sending messages.
 //
 // Parameters:
-//   - cfg: the application configuration providing TeamsEnabled and
-//     TeamsManageEnabled.
+//   - cfg: the application configuration.
 //
-// Returns the slice of OAuth scopes to request during authentication and
-// Graph client initialization.
+// Returns the slice of OAuth scopes to request during authentication.
 func Scopes(cfg config.Config) []string {
-	scopes := []string{calendarScope}
+	scopes := []string{userScope, teamReadScope}
 	switch {
 	case cfg.TeamsManageEnabled:
-		scopes = append(scopes, mailReadWriteScope)
+		scopes = append(scopes, chatReadWriteScope, channelMessageReadScope)
 	case cfg.TeamsEnabled:
-		scopes = append(scopes, mailScope)
+		scopes = append(scopes, chatReadScope, channelMessageReadScope)
 	}
 	return scopes
 }
