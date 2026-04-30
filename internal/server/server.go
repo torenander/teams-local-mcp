@@ -73,7 +73,7 @@ func RegisterTools(s *mcpserver.MCPServer, retryCfg graph.RetryConfig, timeout t
 
 	// Chat domain (when Teams is enabled).
 	if cfg.TeamsEnabled {
-		chatVerbs, chatRegistry := buildChatVerbs(chatVerbsConfig{
+		chatVerbs, chatRegistry := buildChatVerbs(verbsConfig{
 			retryCfg:          retryCfg,
 			timeout:           timeout,
 			cfg:               cfg,
@@ -95,7 +95,7 @@ func RegisterTools(s *mcpserver.MCPServer, retryCfg graph.RetryConfig, timeout t
 
 	// Teams domain (when Teams is enabled).
 	if cfg.TeamsEnabled {
-		teamsVerbs, teamsRegistry := buildTeamsVerbs(teamsVerbsConfig{
+		teamsVerbs, teamsRegistry := buildTeamsVerbs(verbsConfig{
 			retryCfg:          retryCfg,
 			timeout:           timeout,
 			cfg:               cfg,

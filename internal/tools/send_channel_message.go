@@ -15,7 +15,6 @@ import (
 	"github.com/torenander/teams-local-mcp/internal/logging"
 	"github.com/torenander/teams-local-mcp/internal/validate"
 	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
 // NewHandleSendChannelMessage creates a tool handler that sends a message to
@@ -35,7 +34,7 @@ func NewHandleSendChannelMessage(retryCfg graph.RetryConfig, timeout time.Durati
 
 		teamID, err := request.RequireString("team_id")
 		if err != nil {
-			return mcp.NewToolResultError("missing required parameter: team_id"), nil
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 		if err := validate.ValidateResourceID(teamID, "team_id"); err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
@@ -43,7 +42,7 @@ func NewHandleSendChannelMessage(retryCfg graph.RetryConfig, timeout time.Durati
 
 		channelID, err := request.RequireString("channel_id")
 		if err != nil {
-			return mcp.NewToolResultError("missing required parameter: channel_id"), nil
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 		if err := validate.ValidateResourceID(channelID, "channel_id"); err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
@@ -51,7 +50,7 @@ func NewHandleSendChannelMessage(retryCfg graph.RetryConfig, timeout time.Durati
 
 		body, err := request.RequireString("body")
 		if err != nil {
-			return mcp.NewToolResultError("missing required parameter: body"), nil
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		if err := validate.ValidateStringLength(body, "body", validate.MaxBodyLen); err != nil {
@@ -63,17 +62,7 @@ func NewHandleSendChannelMessage(retryCfg graph.RetryConfig, timeout time.Durati
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
-		msg := models.NewChatMessage()
-		msgBody := models.NewItemBody()
-		msgBody.SetContent(&body)
-		if contentType == "html" {
-			ct := models.HTML_BODYTYPE
-			msgBody.SetContentType(&ct)
-		} else {
-			ct := models.TEXT_BODYTYPE
-			msgBody.SetContentType(&ct)
-		}
-		msg.SetBody(msgBody)
+		msg := BuildChatMessageBody(body, contentType)
 
 		timeoutCtx, cancel := graph.WithTimeout(ctx, timeout)
 		defer cancel()

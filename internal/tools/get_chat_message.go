@@ -40,7 +40,7 @@ func NewHandleGetChatMessage(retryCfg graph.RetryConfig, timeout time.Duration) 
 
 		chatID, err := request.RequireString("chat_id")
 		if err != nil {
-			return mcp.NewToolResultError("missing required parameter: chat_id"), nil
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 		if err := validate.ValidateResourceID(chatID, "chat_id"); err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
@@ -48,7 +48,7 @@ func NewHandleGetChatMessage(retryCfg graph.RetryConfig, timeout time.Duration) 
 
 		messageID, err := request.RequireString("message_id")
 		if err != nil {
-			return mcp.NewToolResultError("missing required parameter: message_id"), nil
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 		if err := validate.ValidateResourceID(messageID, "message_id"); err != nil {
 			return mcp.NewToolResultError(err.Error()), nil

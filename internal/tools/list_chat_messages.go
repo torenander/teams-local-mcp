@@ -42,7 +42,7 @@ func NewHandleListChatMessages(retryCfg graph.RetryConfig, timeout time.Duration
 
 		chatID, err := request.RequireString("chat_id")
 		if err != nil {
-			return mcp.NewToolResultError("missing required parameter: chat_id"), nil
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 		if err := validate.ValidateResourceID(chatID, "chat_id"); err != nil {
 			return mcp.NewToolResultError(err.Error()), nil

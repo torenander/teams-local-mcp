@@ -15,7 +15,6 @@ import (
 	"github.com/torenander/teams-local-mcp/internal/logging"
 	"github.com/torenander/teams-local-mcp/internal/validate"
 	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
 // NewHandleSendChatMessage creates a tool handler that sends a message to a
@@ -35,7 +34,7 @@ func NewHandleSendChatMessage(retryCfg graph.RetryConfig, timeout time.Duration)
 
 		chatID, err := request.RequireString("chat_id")
 		if err != nil {
-			return mcp.NewToolResultError("missing required parameter: chat_id"), nil
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 		if err := validate.ValidateResourceID(chatID, "chat_id"); err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
@@ -43,7 +42,7 @@ func NewHandleSendChatMessage(retryCfg graph.RetryConfig, timeout time.Duration)
 
 		body, err := request.RequireString("body")
 		if err != nil {
-			return mcp.NewToolResultError("missing required parameter: body"), nil
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		if err := validate.ValidateStringLength(body, "body", validate.MaxBodyLen); err != nil {
@@ -55,17 +54,7 @@ func NewHandleSendChatMessage(retryCfg graph.RetryConfig, timeout time.Duration)
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
-		msg := models.NewChatMessage()
-		msgBody := models.NewItemBody()
-		msgBody.SetContent(&body)
-		if contentType == "html" {
-			ct := models.HTML_BODYTYPE
-			msgBody.SetContentType(&ct)
-		} else {
-			ct := models.TEXT_BODYTYPE
-			msgBody.SetContentType(&ct)
-		}
-		msg.SetBody(msgBody)
+		msg := BuildChatMessageBody(body, contentType)
 
 		timeoutCtx, cancel := graph.WithTimeout(ctx, timeout)
 		defer cancel()

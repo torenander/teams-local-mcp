@@ -99,7 +99,7 @@ func handleLoginAccount(s *addAccountState, registry *auth.AccountRegistry, cfg 
 
 		label, err := request.RequireString("label")
 		if err != nil {
-			return mcp.NewToolResultError("missing required parameter: label"), nil
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		logger.Debug("tool called", "label", label)

@@ -79,7 +79,7 @@ func HandleLogoutAccount(registry *auth.AccountRegistry) func(ctx context.Contex
 
 		label, err := request.RequireString("label")
 		if err != nil {
-			return mcp.NewToolResultError("missing required parameter: label"), nil
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		logger.Debug("tool called", "label", label)

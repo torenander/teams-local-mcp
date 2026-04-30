@@ -42,7 +42,7 @@ func NewHandleListChannelMessages(retryCfg graph.RetryConfig, timeout time.Durat
 
 		teamID, err := request.RequireString("team_id")
 		if err != nil {
-			return mcp.NewToolResultError("missing required parameter: team_id"), nil
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 		if err := validate.ValidateResourceID(teamID, "team_id"); err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
@@ -50,7 +50,7 @@ func NewHandleListChannelMessages(retryCfg graph.RetryConfig, timeout time.Durat
 
 		channelID, err := request.RequireString("channel_id")
 		if err != nil {
-			return mcp.NewToolResultError("missing required parameter: channel_id"), nil
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 		if err := validate.ValidateResourceID(channelID, "channel_id"); err != nil {
 			return mcp.NewToolResultError(err.Error()), nil

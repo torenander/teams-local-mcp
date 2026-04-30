@@ -39,7 +39,7 @@ func NewHandleGetTeam(retryCfg graph.RetryConfig, timeout time.Duration) func(ct
 
 		teamID, err := request.RequireString("team_id")
 		if err != nil {
-			return mcp.NewToolResultError("missing required parameter: team_id"), nil
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 		if err := validate.ValidateResourceID(teamID, "team_id"); err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
