@@ -209,7 +209,7 @@ func GetEnv(key, defaultValue string) string {
 // Side effects: reads environment variables and calls os.UserHomeDir.
 func LoadConfig() Config {
 	cfg := Config{
-		ClientID:        ResolveClientID(GetEnv("TEAMS_MCP_CLIENT_ID", "outlook-desktop")),
+		ClientID:        ResolveClientID(GetEnv("TEAMS_MCP_CLIENT_ID", "teams-desktop")),
 		TenantID:        GetEnv("TEAMS_MCP_TENANT_ID", "common"),
 		AuthRecordPath:  GetEnv("TEAMS_MCP_AUTH_RECORD_PATH", "~/.teams-local-mcp/auth_record.json"),
 		CacheName:       GetEnv("TEAMS_MCP_CACHE_NAME", "teams-local-mcp"),
