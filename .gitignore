@@ -1,0 +1,4 @@
+teams-local-mcp
+dist/
+*.mcpb
+.DS_Store
