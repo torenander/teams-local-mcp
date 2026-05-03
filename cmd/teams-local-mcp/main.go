@@ -1,4 +1,4 @@
-// Package main is the entry point for the Outlook Local MCP Server binary.
+// Package main is the entry point for the Teams Local MCP Server binary.
 // It executes the startup lifecycle: load configuration, initialize subsystems
 // (logging, audit, OpenTelemetry, authentication), create the Graph client and
 // MCP server, register tools, and start the stdio transport.
@@ -161,7 +161,7 @@ func main() {
 
 	// Step 8: Create MCP server with elicitation capability for multi-account
 	// account selection and interactive authentication prompts.
-	s := server.NewMCPServer("outlook-local", version,
+	s := server.NewMCPServer("teams-local", version,
 		server.WithToolCapabilities(false),
 		server.WithResourceCapabilities(false, false),
 		server.WithRecovery(),

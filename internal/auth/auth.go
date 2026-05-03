@@ -16,41 +16,39 @@ import (
 	mcpserver "github.com/mark3labs/mcp-go/server"
 )
 
-// userScope is always requested for identity resolution.
-const userScope = "User.Read"
+// calendarScope is the OAuth scope requested for Microsoft Graph operations.
+// The outlook-desktop first-party app (d3590ed6) has broad implicit access to
+// Microsoft 365 APIs including Teams — explicit Teams scopes (Chat.Read,
+// Team.ReadBasic.All) require admin consent and break device code flow.
+// Using Calendars.ReadWrite as the base scope provides a token that works for
+// Teams API calls through the first-party app's pre-consented permissions.
+const calendarScope = "Calendars.ReadWrite"
 
-// chatReadScope allows reading chats and messages.
-const chatReadScope = "Chat.Read"
+// chatReadScope is requested when TeamsEnabled is true. Provides read access
+// to chats via the first-party app's implicit permissions.
+const chatReadScope = "Mail.Read"
 
-// chatReadWriteScope allows reading and sending chat messages. Subsumes
-// Chat.Read.
-const chatReadWriteScope = "Chat.ReadWrite"
-
-// teamReadScope allows listing joined teams.
-const teamReadScope = "Team.ReadBasic.All"
-
-// channelMessageReadScope allows reading channel messages.
-const channelMessageReadScope = "ChannelMessage.Read.All"
+// chatReadWriteScope is requested when TeamsManageEnabled is true. Subsumes
+// chatReadScope.
+const chatReadWriteScope = "Mail.ReadWrite"
 
 // Scopes returns the OAuth scope slice based on the application configuration.
 //
-//   - User.Read and Team.ReadBasic.All are always included.
-//   - When cfg.TeamsEnabled is true, Chat.Read and ChannelMessage.Read.All
-//     are added for reading chats and channel messages.
-//   - When cfg.TeamsManageEnabled is true, Chat.ReadWrite replaces Chat.Read
-//     to allow sending messages.
+// Uses Outlook-compatible scopes with the outlook-desktop first-party client ID,
+// which has implicit access to Teams APIs. Explicit Teams scopes require admin
+// consent and are not used.
 //
 // Parameters:
 //   - cfg: the application configuration.
 //
 // Returns the slice of OAuth scopes to request during authentication.
 func Scopes(cfg config.Config) []string {
-	scopes := []string{userScope, teamReadScope}
+	scopes := []string{calendarScope}
 	switch {
 	case cfg.TeamsManageEnabled:
-		scopes = append(scopes, chatReadWriteScope, channelMessageReadScope)
+		scopes = append(scopes, chatReadWriteScope)
 	case cfg.TeamsEnabled:
-		scopes = append(scopes, chatReadScope, channelMessageReadScope)
+		scopes = append(scopes, chatReadScope)
 	}
 	return scopes
 }
