@@ -21,13 +21,13 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/torenander/teams-local-mcp/internal/auth"
-	"github.com/torenander/teams-local-mcp/internal/config"
-	"github.com/torenander/teams-local-mcp/internal/logging"
 	"github.com/google/uuid"
 	"github.com/mark3labs/mcp-go/mcp"
 	mcpserver "github.com/mark3labs/mcp-go/server"
 	"github.com/pkg/browser"
+	"github.com/torenander/teams-local-mcp/internal/auth"
+	"github.com/torenander/teams-local-mcp/internal/config"
+	"github.com/torenander/teams-local-mcp/internal/logging"
 )
 
 // NewAddAccountTool creates the MCP tool definition for add_account. The tool
@@ -592,8 +592,12 @@ func (s *addAccountState) authenticateDeviceCode(
 
 	authCtx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 
-	// Inject channel for capturing the device code message.
-	deviceCodeCh := make(chan string, 1)
+	// Inject channel for capturing the device code challenge. The element type
+	// is the structured auth.DeviceCodePrompt rather than a bare string so the
+	// same channel serves both this handler (which needs only the rendered
+	// message) and the auth middleware (which builds a sign-in link from the
+	// user code) — CR-0067 A7.
+	deviceCodeCh := make(chan auth.DeviceCodePrompt, 1)
 	authCtx = context.WithValue(authCtx, auth.DeviceCodeMsgKey, deviceCodeCh)
 
 	// Create pending account struct upfront so goroutine can write to p.err.
@@ -617,9 +621,9 @@ func (s *addAccountState) authenticateDeviceCode(
 
 	// Wait for the device code prompt, then present it via elicitation.
 	select {
-	case msg := <-deviceCodeCh:
+	case prompt := <-deviceCodeCh:
 		logger.Info("device code prompt captured, presenting to client")
-		if elicitErr := s.presentDeviceCodeElicitation(ctx, msg, label, logger); elicitErr != nil {
+		if elicitErr := s.presentDeviceCodeElicitation(ctx, prompt.Message, label, logger); elicitErr != nil {
 			// Elicitation failed. Keep goroutine alive and store pending state
 			// so the next add_account call can pick up the completed auth.
 			s.storePending(label, p)
