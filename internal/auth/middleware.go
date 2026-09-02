@@ -371,8 +371,9 @@ func (s *authMiddlewareState) handleAuthError(
 //  3. Opens the URL in the system browser.
 //  4. Attempts MCP elicitation with a redirect_url text field.
 //  5. If elicitation succeeds, calls ExchangeCode and retries the tool call.
-//  6. If elicitation is not supported, returns the auth URL with instructions
-//     to use the complete_auth tool.
+//  6. If elicitation is not supported, returns guidance routing the caller to
+//     the device_code method (this server registers no verb that could accept
+//     a pasted redirect URL).
 //
 // Parameters:
 //   - ctx: the tool handler context containing the MCPServer.
@@ -432,13 +433,8 @@ func (s *authMiddlewareState) handleAuthCodeAuth(
 
 	result, elicitErr := s.elicit(ctx, elicitationRequest)
 	if elicitErr != nil {
-		slog.Info("elicitation failed, returning auth URL for complete_auth tool", "error", elicitErr)
-		return mcp.NewToolResultText(fmt.Sprintf(
-			"Authentication required. A browser window has opened for Microsoft login.\n\n"+
-				"After signing in, copy the full URL from the browser's address bar and use the "+
-				"complete_auth tool with the redirect_url parameter to finish authentication.\n\n"+
-				"Auth URL: %s",
-			authURL)), nil
+		slog.Info("elicitation failed, routing caller to device_code", "error", elicitErr)
+		return mcp.NewToolResultText(AuthCodeElicitationUnavailableText()), nil
 	}
 
 	// Handle elicitation response action.

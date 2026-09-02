@@ -441,9 +441,9 @@ func (s *addAccountState) authenticateBrowser(
 // authenticateAuthCode performs auth code authentication with form mode
 // elicitation. It generates the authorization URL, opens the browser,
 // and attempts to elicit the redirect URL from the user. When any
-// elicitation error occurs, returns an error with the auth URL and
-// complete_auth instructions so the user can complete authentication
-// manually.
+// elicitation error occurs, returns an error routing the caller to the
+// device_code method: this server registers no verb that could accept a
+// pasted redirect URL, so auth_code cannot be finished out of band.
 //
 // Parameters:
 //   - ctx: the tool handler context containing the MCPServer.
@@ -499,12 +499,8 @@ func (s *addAccountState) authenticateAuthCode(
 
 	result, elicitErr := s.elicit(ctx, elicitationRequest)
 	if elicitErr != nil {
-		logger.Info("elicitation failed, returning auth URL for complete_auth tool", "error", elicitErr)
-		return fmt.Errorf(
-			"elicitation not supported by MCP client. A browser window has opened for Microsoft login. "+
-				"After signing in, copy the full URL from the browser's address bar and use the "+
-				"complete_auth tool with redirect_url parameter and account label %q to finish authentication",
-			label)
+		logger.Info("elicitation failed, routing caller to device_code", "error", elicitErr)
+		return auth.AuthCodeElicitationUnavailableAddError(label)
 	}
 
 	// Handle elicitation response action.

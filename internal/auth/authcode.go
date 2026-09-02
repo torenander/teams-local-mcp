@@ -86,8 +86,10 @@ func WithCacheAccessor(cacheAccessor msalcache.ExportReplace) NewAuthCodeCredent
 // AuthCodeCredential wraps MSAL Go's public.Client to implement the OAuth 2.0
 // authorization code flow with PKCE using the nativeclient redirect URI. It
 // satisfies both azcore.TokenCredential (for the Graph SDK) and Authenticator
-// (for the AuthMiddleware), as well as AuthCodeFlow (for the add_account tool
-// and complete_auth tool).
+// (for the AuthMiddleware), as well as AuthCodeFlow (for the add_account tool).
+//
+// Note for readers porting from outlook-local-mcp: there the flow is also
+// driven by a complete_auth tool, which this server does not register.
 //
 // The credential lifecycle is:
 //  1. AuthCodeURL generates the authorization URL for the user.
