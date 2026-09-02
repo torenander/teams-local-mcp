@@ -406,14 +406,34 @@ asked to re-authenticate and every cached token keeps working.
 ## Follow-ups
 
 1. Run the `browser` / `dd5fc5c5` sign-in test above and record the outcome here.
+   **Still open.** It needs a human sign-in and cannot be settled from the code; see
+   the methodology caution above before attempting it.
 2. Port A6 (per-account re-authentication slot) — matters for multi-account setups.
+   **Done**, branch `fix/cr-0067-followups`. The port also had to replace
+   `inferAuthMethod`, which the slot makes load-bearing: the old rule collapsed every
+   non-`AuthCodeFlow` credential to `browser`, so with the slot wired a `device_code`
+   account would have been pushed through the browser flow. The persisted
+   `AuthMethod` is now authoritative when set. Unit-tested only — confirming it end
+   to end still needs a second real account.
 3. Decide the `complete_auth` question: either port the verb (upstream A3) or reword
-   the two strings that name it.
+   the two strings that name it. **Done** (rewording), branch
+   `fix/cr-0067-followups`. Both elicitation-failure messages now route to
+   `device_code` and no longer offer the authorization URL, which could not be
+   completed without a verb to accept the redirect. Three doc comments describing the
+   absent tool were corrected at the same time.
 4. `internal/auth/filecache.go:35` — `cae` field unused (pre-existing lint finding,
-   untouched).
+   untouched). **Resolved as won't-remove**, branch `fix/cr-0067-followups`. The field
+   is a layout placeholder for the `unsafe.Pointer` cast in `initFileCacheValue`;
+   removing it moves `mu` from offset 40 to 24 and azidentity would read a
+   `*sync.RWMutex` out of an `ExportReplace` slot. It now carries a `nolint`
+   directive explaining that. Separately, this struct's doc comment claimed the
+   layout was "verified by `TestFileCacheShimLayout`" and no such test existed;
+   `filecache_layout_test.go` now provides it, mutation-checked.
 5. 25 files in this repository are not `gofmt`-clean (import ordering and map
    alignment), pre-existing. Only files touched by this change were formatted. A
-   repo-wide `gofmt -w .` is a separate mechanical change.
+   repo-wide `gofmt -w .` is a separate mechanical change. **Done** as that separate
+   change, branch `chore/gofmt` off `main`, where the count is 29 rather than 25
+   because this branch had already formatted the files it touched.
 
 ## Origin
 
