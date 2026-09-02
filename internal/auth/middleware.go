@@ -207,6 +207,12 @@ func AuthMiddleware(cred Authenticator, authRecordPath string, authMethod string
 // Returns the wrapped handler.
 func (s *authMiddlewareState) wrap(next mcpserver.ToolHandlerFunc) mcpserver.ToolHandlerFunc {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		// Install the per-request account slot so AccountResolver, which runs
+		// inside this middleware, can report which account it picked
+		// (CR-0067 A6). See account_slot.go for why a mutable slot is needed
+		// instead of a plain context value.
+		ctx, _ = withAccountAuthSlot(ctx)
+
 		// Verbs that exist to repair authentication must never be gated on
 		// authentication being healthy (CR-0067 A4).
 		recovery := isRecoveryOperation(request)
@@ -328,12 +334,15 @@ func (s *authMiddlewareState) handleAuthError(
 	}
 
 	// Resolve per-account auth details from context when available
-	// (injected by AccountResolver). Fall back to the closure credential
-	// for backward compatibility.
+	// (injected by AccountResolver). resolvedAccountAuth reads the slot the
+	// resolver filled in during the handler call (CR-0067 A6) and falls back to
+	// a directly injected context value. When neither is present -- for example
+	// on the fresh-credential fast path, which never reaches AccountResolver --
+	// the closure credential is used.
 	cred := s.cred
 	authRecordPath := s.authRecordPath
 	authMethod := s.authMethod
-	if aa, ok := AccountAuthFromContext(ctx); ok {
+	if aa, ok := resolvedAccountAuth(ctx); ok {
 		cred = aa.Authenticator
 		authRecordPath = aa.AuthRecordPath
 		authMethod = aa.AuthMethod
