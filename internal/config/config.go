@@ -335,6 +335,31 @@ func LoadConfig() Config {
 // source "default" because custom app registrations typically have
 // http://localhost redirect URIs configured.
 //
+// # Why device_code is still inferred (CR-0067)
+//
+// This behaviour is deliberately unchanged. Two alternatives were tried in
+// outlook-local-mcp against the same shipped client ID this server defaults to
+// (outlook-desktop, d3590ed6-52b3-4102-aeff-aad2292ab01c) and both were
+// rejected on live evidence, dated 2026-09-02:
+//
+//   - auth_code: the nativeclient redirect page now renders a Microsoft
+//     anti-phishing interstitial ("The URL contains your password... do not
+//     copy or share the URL") followed by "You have reached the wrong page".
+//     The flow does not complete. auth_code remains fully implemented and
+//     selectable via TEAMS_MCP_AUTH_METHOD=auth_code.
+//   - browser: a real sign-in returns AADSTS50011 — InteractiveBrowserCredential
+//     binds a random localhost port and none of them is registered on that
+//     application.
+//
+// An open question specific to this server is recorded in
+// docs/cr/CR-0067-authentication-resilience-and-in-band-recovery.md: the
+// WellKnownClientIDs table also carries a teams-local-mcp entry (dd5fc5c5-...),
+// which looks like a custom app registration and may register a localhost
+// redirect URI. If it does, browser would be viable for that client ID — but
+// only an end-to-end sign-in settles it. Fetching the authorize endpoint does
+// NOT: Entra ID defers redirect_uri validation until after authentication, so
+// a rendered login page is a false negative.
+//
 // Parameters:
 //   - clientID: the resolved (UUID) client ID from configuration.
 //   - explicitAuthMethod: the value of TEAMS_MCP_AUTH_METHOD, or "" if unset.
