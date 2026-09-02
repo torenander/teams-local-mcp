@@ -1,4 +1,4 @@
-teams-local-mcp
+/teams-local-mcp
 dist/
 *.mcpb
 .DS_Store
