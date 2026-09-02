@@ -11,9 +11,9 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/torenander/teams-local-mcp/internal/auth"
 	"github.com/torenander/teams-local-mcp/internal/logging"
-	"github.com/mark3labs/mcp-go/mcp"
 )
 
 // NewListAccountsTool creates the MCP tool definition for list_accounts.

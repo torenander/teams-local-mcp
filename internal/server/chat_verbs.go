@@ -5,10 +5,10 @@
 package server
 
 import (
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/torenander/teams-local-mcp/internal/graph"
 	"github.com/torenander/teams-local-mcp/internal/tools"
 	"github.com/torenander/teams-local-mcp/internal/tools/help"
-	"github.com/mark3labs/mcp-go/mcp"
 )
 
 // buildChatVerbs constructs and returns the ordered verb slice and registry

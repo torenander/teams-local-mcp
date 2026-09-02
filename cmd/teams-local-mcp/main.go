@@ -12,6 +12,11 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/mark3labs/mcp-go/server"
+	_ "github.com/microsoft/kiota-abstractions-go"
+	_ "github.com/microsoft/kiota-authentication-azure-go"
+	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
+	_ "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/torenander/teams-local-mcp/internal/audit"
 	"github.com/torenander/teams-local-mcp/internal/auth"
 	"github.com/torenander/teams-local-mcp/internal/config"
@@ -19,11 +24,6 @@ import (
 	"github.com/torenander/teams-local-mcp/internal/logging"
 	"github.com/torenander/teams-local-mcp/internal/observability"
 	internalserver "github.com/torenander/teams-local-mcp/internal/server"
-	"github.com/mark3labs/mcp-go/server"
-	_ "github.com/microsoft/kiota-abstractions-go"
-	_ "github.com/microsoft/kiota-authentication-azure-go"
-	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
-	_ "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"go.opentelemetry.io/otel"
 )
 

@@ -15,9 +15,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/torenander/teams-local-mcp/internal/auth"
 	"github.com/torenander/teams-local-mcp/internal/logging"
-	"github.com/mark3labs/mcp-go/mcp"
 )
 
 // NewLogoutAccountTool creates the MCP tool definition for account_logout.

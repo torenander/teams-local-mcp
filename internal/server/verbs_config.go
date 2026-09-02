@@ -3,12 +3,12 @@
 package server
 
 import (
+	mcpserver "github.com/mark3labs/mcp-go/server"
 	"github.com/torenander/teams-local-mcp/internal/audit"
 	"github.com/torenander/teams-local-mcp/internal/config"
 	"github.com/torenander/teams-local-mcp/internal/graph"
 	"github.com/torenander/teams-local-mcp/internal/observability"
 	"github.com/torenander/teams-local-mcp/internal/tools"
-	mcpserver "github.com/mark3labs/mcp-go/server"
 	"go.opentelemetry.io/otel/trace"
 	"time"
 )

@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/torenander/teams-local-mcp/internal/config"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/torenander/teams-local-mcp/internal/config"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"

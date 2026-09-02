@@ -12,9 +12,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/torenander/teams-local-mcp/internal/auth"
 	"github.com/torenander/teams-local-mcp/internal/logging"
-	"github.com/mark3labs/mcp-go/mcp"
 )
 
 // NewRemoveAccountTool creates the MCP tool definition for remove_account.

@@ -12,12 +12,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/torenander/teams-local-mcp/internal/graph"
-	"github.com/torenander/teams-local-mcp/internal/logging"
-	"github.com/torenander/teams-local-mcp/internal/validate"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
+	"github.com/torenander/teams-local-mcp/internal/graph"
+	"github.com/torenander/teams-local-mcp/internal/logging"
+	"github.com/torenander/teams-local-mcp/internal/validate"
 )
 
 // NewHandleListChatMessages creates a tool handler that lists messages in a

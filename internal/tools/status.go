@@ -13,10 +13,10 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/torenander/teams-local-mcp/internal/auth"
 	"github.com/torenander/teams-local-mcp/internal/config"
 	"github.com/torenander/teams-local-mcp/internal/logging"
-	"github.com/mark3labs/mcp-go/mcp"
 )
 
 // NewStatusTool creates the MCP tool definition for the status diagnostic tool.
@@ -324,10 +324,10 @@ func HandleStatus(cfg config.Config, registry *auth.AccountRegistry, startTime t
 					ShutdownTimeoutSeconds: int(cfg.ShutdownTimeout.Seconds()),
 				},
 				Features: statusConfigFeatures{
-					ReadOnly:          cfg.ReadOnly,
+					ReadOnly:           cfg.ReadOnly,
 					TeamsEnabled:       cfg.TeamsEnabled,
 					TeamsManageEnabled: cfg.TeamsManageEnabled,
-					ProvenanceTag:     cfg.ProvenanceTag,
+					ProvenanceTag:      cfg.ProvenanceTag,
 				},
 				Observability: statusConfigObservability{
 					OTELEnabled:     cfg.OTELEnabled,

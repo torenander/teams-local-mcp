@@ -11,11 +11,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/torenander/teams-local-mcp/internal/graph"
-	"github.com/torenander/teams-local-mcp/internal/logging"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
+	"github.com/torenander/teams-local-mcp/internal/graph"
+	"github.com/torenander/teams-local-mcp/internal/logging"
 )
 
 // NewHandleListChats creates a tool handler that lists the authenticated
