@@ -33,11 +33,24 @@ func TestAuthCodeElicitationUnavailable_GuidanceIsActionable(t *testing.T) {
 		})
 	}
 
-	// The middleware path re-authenticates an account that already exists. The
-	// login verb takes no auth_method, so the only way out is to change the
-	// server's configured method.
-	if !strings.Contains(messages["middleware"], "TEAMS_MCP_AUTH_METHOD") {
-		t.Errorf("middleware guidance does not name the env var that selects the method:\n%s", messages["middleware"])
+	// The middleware path re-authenticates an account that may already be in
+	// accounts.json. Only remove-then-add actually moves such an account onto
+	// device_code: login takes no auth_method and resolves the method from
+	// entry.AuthMethod (tools/login_account.go), and startup rebuilds from the
+	// persisted value (restore.go), so changing TEAMS_MCP_AUTH_METHOD and
+	// restarting leaves a stored auth_code account exactly where it was.
+	mw := messages["middleware"]
+	for _, want := range []string{`operation="remove"`, `operation="add"`, "auth_method"} {
+		if !strings.Contains(mw, want) {
+			t.Errorf("middleware guidance does not name %s, so it cannot be carried out "+
+				"for an account in accounts.json:\n%s", want, mw)
+		}
+	}
+	// Guard the regression directly: login is not an exit from this state, so
+	// offering it would put the caller back in the same dead end.
+	if strings.Contains(mw, `operation="login"`) {
+		t.Errorf("middleware guidance offers login, which re-enters the auth_code dead end "+
+			"for a stored account:\n%s", mw)
 	}
 
 	// The add path can pass auth_method directly, and must keep naming the label.

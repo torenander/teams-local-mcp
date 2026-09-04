@@ -17,8 +17,16 @@ import (
 // initFileCacheValue builds a cacheShim and reinterprets it as an
 // azidentity.Cache. That is only sound while cacheImplShim has byte-for-byte
 // the same layout as azidentity's internal.impl, pinned here at
-// azidentity v1.13.1. Two things can break it: azidentity changing its own
-// struct on upgrade, or someone editing cacheImplShim here.
+// azidentity v1.13.1.
+//
+// What this test can and cannot see. azidentity's internal.impl lives in
+// azidentity/internal, which is unimportable, so nothing here can compare
+// against it directly. What is checked is that azidentity.Cache stays one
+// pointer wide, and that cacheImplShim's own field layout does not drift. That
+// catches a local edit to the shim, and it catches Cache gaining a field --
+// but a field added or reordered inside internal.impl on an azidentity upgrade
+// will pass this test silently. Bumping azidentity still requires reading
+// internal.impl by hand.
 //
 // The cae and noCAE fields are never read or written by name, which makes
 // linters call them unused. They are not: they occupy the offsets azidentity
@@ -32,15 +40,19 @@ func TestFileCacheShimLayout(t *testing.T) {
 			"the cast in initFileCacheValue is no longer layout-safe", got, want)
 	}
 
-	// Offsets of the mirrored impl struct, pinned to azidentity v1.13.1.
-	// factory is a func (1 word), cae and noCAE are interfaces (2 words each),
-	// mu is a pointer (1 word).
-	const (
-		wantFactoryOffset = 0
-		wantCAEOffset     = 8
-		wantNoCAEOffset   = 24
-		wantMuOffset      = 40
-		wantImplSize      = 48
+	// Offsets of the mirrored impl struct, derived from the field widths rather
+	// than hardcoded, so the test states the layout rule instead of one
+	// architecture's arithmetic. factory is a func (1 word), cae and noCAE are
+	// interfaces (2 words each), mu is a pointer (1 word). Hardcoding 0/8/24/40
+	// would fail on a 32-bit build of a perfectly sound cast.
+	var (
+		word              = unsafe.Sizeof(uintptr(0))
+		iface             = unsafe.Sizeof(msalcache.ExportReplace(nil))
+		wantFactoryOffset = uintptr(0)
+		wantCAEOffset     = word
+		wantNoCAEOffset   = word + iface
+		wantMuOffset      = word + 2*iface
+		wantImplSize      = word + 2*iface + word
 	)
 
 	checks := []struct {
@@ -61,12 +73,13 @@ func TestFileCacheShimLayout(t *testing.T) {
 		}
 	}
 
-	// The field widths the offsets above depend on. Stated explicitly so a
-	// failure points at which assumption moved.
-	if got := unsafe.Sizeof(msalcache.ExportReplace(nil)); got != 16 {
-		t.Errorf("sizeof(ExportReplace) = %d, want 16 (interface header)", got)
+	// The field widths the offsets above are derived from. An interface header
+	// is two words and a pointer is one; if either stops being true the derived
+	// offsets are meaningless, so say which assumption moved.
+	if iface != 2*word {
+		t.Errorf("sizeof(ExportReplace) = %d, want %d (two-word interface header)", iface, 2*word)
 	}
-	if got := unsafe.Sizeof((*sync.RWMutex)(nil)); got != 8 {
-		t.Errorf("sizeof(*sync.RWMutex) = %d, want 8 (pointer)", got)
+	if got := unsafe.Sizeof((*sync.RWMutex)(nil)); got != word {
+		t.Errorf("sizeof(*sync.RWMutex) = %d, want %d (one-word pointer)", got, word)
 	}
 }

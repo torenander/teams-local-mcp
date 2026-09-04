@@ -21,9 +21,20 @@ import "fmt"
 // middleware starts the auth_code flow while re-authenticating an existing
 // account and the MCP client does not support elicitation.
 //
-// The recovery names TEAMS_MCP_AUTH_METHOD rather than a per-call parameter
-// because the login verb takes no auth_method: with the server still configured
-// for auth_code, calling login would re-enter this same dead end.
+// The recovery routes through remove-then-add, which is the only exit that
+// actually works for an account in accounts.json. Two things rule out the
+// simpler options: the login verb takes no auth_method, and login resolves the
+// method from entry.AuthMethod, falling back to the server default only when
+// that is empty (tools/login_account.go). Restoring at startup does the same
+// from the persisted value (restore.go). So changing TEAMS_MCP_AUTH_METHOD and
+// restarting leaves a stored auth_code account on auth_code, and calling login
+// re-enters this dead end. add cannot reuse the label while the account exists,
+// so the account has to be removed first -- which is local-only and does not
+// revoke anything with Microsoft.
+//
+// This path became reachable for named accounts with the A6 slot: before it,
+// handleAuthError always used the server default, so this text only appeared
+// for the memory-only default account, where the env var does work.
 //
 // Returns the guidance as tool result text.
 func AuthCodeElicitationUnavailableText() string {
@@ -31,12 +42,18 @@ func AuthCodeElicitationUnavailableText() string {
 		"post-sign-in redirect URL pasted back, and this MCP client does not support " +
 		"the prompt this server uses to collect it. Any browser window that opened can " +
 		"be closed; signing in there cannot finish the flow.\n\n" +
-		"To recover, switch the server to the device_code method:\n" +
-		"1. Set TEAMS_MCP_AUTH_METHOD=device_code and restart the server\n" +
-		"2. Call account with operation=\"list\" to see which account is disconnected\n" +
-		"3. Call account with operation=\"login\" for that account\n" +
+		"To recover, move the account onto the device_code method:\n" +
+		"1. Call account with operation=\"list\" to see which account is disconnected\n" +
+		"2. Call account with operation=\"remove\" for that label. This clears local " +
+		"tokens only and does not revoke anything with Microsoft\n" +
+		"3. Call account with operation=\"add\" using the same label and " +
+		"auth_method=\"device_code\"\n" +
 		"4. Enter the code it returns at the sign-in page\n" +
-		"5. Retry your original request"
+		"5. Retry your original request\n\n" +
+		"Note: setting TEAMS_MCP_AUTH_METHOD=device_code changes the default for " +
+		"accounts added later. It does not move an account already stored as " +
+		"auth_code, because login and startup both prefer the account's own " +
+		"stored method."
 }
 
 // AuthCodeElicitationUnavailableAddError returns the error returned when the

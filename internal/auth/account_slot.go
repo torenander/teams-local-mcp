@@ -28,9 +28,13 @@ import (
 // accountAuthSlot is a mutable, concurrency-safe container for the AccountAuth
 // that AccountResolver resolved for one tool call.
 //
-// A tool handler runs on a single goroutine, but the slot is guarded anyway:
-// the interactive flows read it from a background goroutine, so the mutex is
-// load-bearing rather than merely documentary.
+// A tool handler runs on a single goroutine, and both accesses are on that
+// goroutine: AccountResolver stores during next(ctx, request), and
+// handleAuthError loads after it returns. The background auth goroutines close
+// over credentials already read out of the slot, and never touch it. The mutex
+// is therefore about making that ordering explicit rather than conventional --
+// it is not guarding a real cross-goroutine race today, and the comment says so
+// rather than implying a protection that is not being relied on.
 type accountAuthSlot struct {
 	// mu guards auth and set.
 	mu sync.Mutex
