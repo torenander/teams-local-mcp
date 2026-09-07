@@ -11,8 +11,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/torenander/teams-local-mcp/internal/auth"
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
+	"github.com/torenander/teams-local-mcp/internal/auth"
 )
 
 // AccountParamDescription is the shared description text applied to the

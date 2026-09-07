@@ -21,13 +21,13 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/torenander/teams-local-mcp/internal/auth"
-	"github.com/torenander/teams-local-mcp/internal/config"
-	"github.com/torenander/teams-local-mcp/internal/logging"
 	"github.com/google/uuid"
 	"github.com/mark3labs/mcp-go/mcp"
 	mcpserver "github.com/mark3labs/mcp-go/server"
 	"github.com/pkg/browser"
+	"github.com/torenander/teams-local-mcp/internal/auth"
+	"github.com/torenander/teams-local-mcp/internal/config"
+	"github.com/torenander/teams-local-mcp/internal/logging"
 )
 
 // NewAddAccountTool creates the MCP tool definition for add_account. The tool

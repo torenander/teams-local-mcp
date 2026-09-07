@@ -11,11 +11,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/torenander/teams-local-mcp/internal/graph"
 	"github.com/torenander/teams-local-mcp/internal/logging"
 	"github.com/torenander/teams-local-mcp/internal/validate"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
 // NewHandleListChannels creates a tool handler that lists channels in a team.

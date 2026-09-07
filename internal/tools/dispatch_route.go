@@ -12,9 +12,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/torenander/teams-local-mcp/internal/logging"
 	"github.com/mark3labs/mcp-go/mcp"
 	mcpserver "github.com/mark3labs/mcp-go/server"
+	"github.com/torenander/teams-local-mcp/internal/logging"
 )
 
 // DomainToolConfig holds configuration for a single domain aggregate tool

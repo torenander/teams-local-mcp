@@ -17,10 +17,10 @@ import (
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/torenander/teams-local-mcp/internal/auth"
 	"github.com/torenander/teams-local-mcp/internal/config"
 	"github.com/torenander/teams-local-mcp/internal/logging"
-	"github.com/mark3labs/mcp-go/mcp"
 )
 
 // silentLoginTimeout is the maximum duration for a silent token acquisition
