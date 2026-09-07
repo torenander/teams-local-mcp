@@ -29,7 +29,7 @@ import (
 //   - authMW: authentication middleware factory.
 //   - registry: account registry for multi-account resolution.
 //   - cfg: server configuration.
-//   - cred: default account authenticator (for complete_auth).
+//   - cred: default account authenticator for the default account's verbs.
 //
 // Side effects: registers tool handlers on the server.
 func RegisterTools(s *mcpserver.MCPServer, retryCfg graph.RetryConfig, timeout time.Duration, m *observability.ToolMetrics, t trace.Tracer, readOnly bool, authMW func(mcpserver.ToolHandlerFunc) mcpserver.ToolHandlerFunc, registry *auth.AccountRegistry, cfg config.Config, cred auth.Authenticator) {

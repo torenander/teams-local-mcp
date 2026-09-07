@@ -207,6 +207,12 @@ func AuthMiddleware(cred Authenticator, authRecordPath string, authMethod string
 // Returns the wrapped handler.
 func (s *authMiddlewareState) wrap(next mcpserver.ToolHandlerFunc) mcpserver.ToolHandlerFunc {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		// Install the per-request account slot so AccountResolver, which runs
+		// inside this middleware, can report which account it picked
+		// (CR-0067 A6). See account_slot.go for why a mutable slot is needed
+		// instead of a plain context value.
+		ctx, _ = withAccountAuthSlot(ctx)
+
 		// Verbs that exist to repair authentication must never be gated on
 		// authentication being healthy (CR-0067 A4).
 		recovery := isRecoveryOperation(request)
@@ -328,12 +334,15 @@ func (s *authMiddlewareState) handleAuthError(
 	}
 
 	// Resolve per-account auth details from context when available
-	// (injected by AccountResolver). Fall back to the closure credential
-	// for backward compatibility.
+	// (injected by AccountResolver). resolvedAccountAuth reads the slot the
+	// resolver filled in during the handler call (CR-0067 A6) and falls back to
+	// a directly injected context value. When neither is present -- for example
+	// on the fresh-credential fast path, which never reaches AccountResolver --
+	// the closure credential is used.
 	cred := s.cred
 	authRecordPath := s.authRecordPath
 	authMethod := s.authMethod
-	if aa, ok := AccountAuthFromContext(ctx); ok {
+	if aa, ok := resolvedAccountAuth(ctx); ok {
 		cred = aa.Authenticator
 		authRecordPath = aa.AuthRecordPath
 		authMethod = aa.AuthMethod
@@ -371,8 +380,9 @@ func (s *authMiddlewareState) handleAuthError(
 //  3. Opens the URL in the system browser.
 //  4. Attempts MCP elicitation with a redirect_url text field.
 //  5. If elicitation succeeds, calls ExchangeCode and retries the tool call.
-//  6. If elicitation is not supported, returns the auth URL with instructions
-//     to use the complete_auth tool.
+//  6. If elicitation is not supported, returns guidance routing the caller to
+//     the device_code method (this server registers no verb that could accept
+//     a pasted redirect URL).
 //
 // Parameters:
 //   - ctx: the tool handler context containing the MCPServer.
@@ -432,13 +442,8 @@ func (s *authMiddlewareState) handleAuthCodeAuth(
 
 	result, elicitErr := s.elicit(ctx, elicitationRequest)
 	if elicitErr != nil {
-		slog.Info("elicitation failed, returning auth URL for complete_auth tool", "error", elicitErr)
-		return mcp.NewToolResultText(fmt.Sprintf(
-			"Authentication required. A browser window has opened for Microsoft login.\n\n"+
-				"After signing in, copy the full URL from the browser's address bar and use the "+
-				"complete_auth tool with the redirect_url parameter to finish authentication.\n\n"+
-				"Auth URL: %s",
-			authURL)), nil
+		slog.Info("elicitation failed, routing caller to device_code", "error", elicitErr)
+		return mcp.NewToolResultText(AuthCodeElicitationUnavailableText()), nil
 	}
 
 	// Handle elicitation response action.

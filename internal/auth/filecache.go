@@ -29,11 +29,19 @@ import (
 // IMPORTANT: This struct must exactly match the layout of internal.impl at
 // azidentity v1.13.1. If the azidentity module changes the internal Cache
 // struct layout, this shim must be updated. The struct layout is verified
-// by TestFileCacheShimLayout.
+// by TestFileCacheShimLayout in filecache_layout_test.go, which pins both the
+// field offsets and the width of azidentity.Cache.
 type cacheImplShim struct {
-	factory    func(bool) (msalcache.ExportReplace, error)
-	cae, noCAE msalcache.ExportReplace
-	mu         *sync.RWMutex
+	factory func(bool) (msalcache.ExportReplace, error)
+
+	// cae and noCAE are never read or written by name, which makes linters
+	// report them as unused. They must not be removed: they hold the offsets
+	// azidentity's internal.impl expects, and dropping either one moves mu, so
+	// azidentity would read a *sync.RWMutex out of an ExportReplace slot.
+	// TestFileCacheShimLayout fails if they move.
+	cae, noCAE msalcache.ExportReplace //nolint:unused // layout placeholders for the unsafe.Pointer cast
+
+	mu *sync.RWMutex
 }
 
 // cacheShim mirrors the internal.Cache struct layout.
