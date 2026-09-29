@@ -179,6 +179,14 @@ func FormatChatsText(chats []map[string]any) string {
 		}
 		fmt.Fprintf(&b, "%d. %s [%s]\n", i+1, topic, chatType)
 
+		if last, ok := c["lastMessageDateTime"].(string); ok && last != "" {
+			from, _ := c["lastMessageFrom"].(string)
+			if from == "" {
+				from = "(system)"
+			}
+			fmt.Fprintf(&b, "   Last message: %s by %s\n", last, from)
+		}
+
 		if members, ok := c["members"].(string); ok && members != "" {
 			fmt.Fprintf(&b, "   Members: %s\n", members)
 		}

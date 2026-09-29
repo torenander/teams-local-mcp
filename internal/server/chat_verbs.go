@@ -37,7 +37,7 @@ func buildListChatsVerb(c verbsConfig, rc graph.RetryConfig) tools.Verb {
 	return tools.Verb{
 		Name:        "list_chats",
 		Summary:     "list your 1:1 and group chats",
-		Description: "Returns a list of chats the authenticated user is a member of, including 1:1 chats, group chats, and meeting chats. Each entry includes the chat topic, type, and last updated time.",
+		Description: "Returns chats the authenticated user is a member of (1:1, group and meeting), newest message first. Each entry includes topic, type, lastMessageDateTime, lastMessageFrom and lastMessageType. Pages past Graph's 50-per-call limit. Use since to get every chat with a message at or after a point in time. lastUpdatedDateTime reflects renames/membership changes, not messages.",
 		Handler:     wrapRead(c, "chat.list_chats", "read", tools.NewHandleListChats(rc, c.timeout)),
 		Annotations: []mcp.ToolOption{
 			mcp.WithReadOnlyHintAnnotation(true),
@@ -50,8 +50,11 @@ func buildListChatsVerb(c verbsConfig, rc graph.RetryConfig) tools.Verb {
 				mcp.Description(tools.AccountParamDescription),
 			),
 			mcp.WithNumber("max_results",
-				mcp.Description("Maximum number of chats to return (default 25)."),
+				mcp.Description("Maximum number of chats to return (default 25; default 1000 when since is set). Pages automatically past 50."),
 				mcp.Min(1),
+			),
+			mcp.WithString("since",
+				mcp.Description("Only return chats whose last message is at or after this time. RFC 3339 (2026-09-22T00:00:00Z) or YYYY-MM-DD (midnight UTC)."),
 			),
 			mcp.WithString("output",
 				mcp.Description("Output mode: 'text' (default), 'summary', or 'raw'."),
